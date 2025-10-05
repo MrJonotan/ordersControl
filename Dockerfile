@@ -8,6 +8,6 @@ RUN mvn clean package -DskipTests
 # Этап 2: запуск jar
 FROM eclipse-temurin:22-jdk
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/orders-control-1.0-SNAPSHOT-shaded.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
