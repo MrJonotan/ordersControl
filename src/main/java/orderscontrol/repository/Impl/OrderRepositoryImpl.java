@@ -24,13 +24,14 @@ public class OrderRepositoryImpl implements OrderRepository {
     // Получение списка всех заказов клиента
     @Override
     public List<Order> findByCustomer(String customerName) {
-        List<Order> list = new ArrayList<>();
-        String sql =  selectQuery + " WHERE o.customer_id = (SELECT c.id FROM customers c  WHERE c.name LIKE ?";
-        try (Connection conn = DBConnection.getInstance().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, customerName);
-            ResultSet rs = ps.executeQuery();
+        List<Order> list = new ArrayList<>(); // Массив под результаты
+        String sql =  selectQuery + " WHERE o.customer_id = (SELECT c.id FROM customers c  WHERE c.name LIKE ?"; // Строка запроса к БД // Строка запроса к БД
+        try (Connection conn = DBConnection.getInstance().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) { // Подключение
+            ps.setString(1, customerName); // Передача переменных в запрос
+            ResultSet rs = ps.executeQuery(); // Результат выполнения запроса 
+            // Перебор результатов
             while (rs.next()) {
-                list.add(mapRow(rs));
+                list.add(mapRow(rs)); // Добавление объектов в массив
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -41,13 +42,13 @@ public class OrderRepositoryImpl implements OrderRepository {
     // Получение списка заказов по названию продукта
     @Override
     public List<Order> findByProduct(String productName) {
-        List<Order> list = new ArrayList<>();
-        String sql = selectQuery + " WHERE o.product_id = (SELECT p.id FROM products p  WHERE p.description LIKE ?)";
+        List<Order> list = new ArrayList<>(); // Массив под результаты
+        String sql = selectQuery + " WHERE o.product_id = (SELECT p.id FROM products p  WHERE p.description LIKE ?)"; // Строка запроса к БД
         try (Connection conn = DBConnection.getInstance().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, productName);
-            ResultSet rs = ps.executeQuery();
+            ps.setString(1, productName); // Передача переменных в запрос
+            ResultSet rs = ps.executeQuery(); // Результат выполнения запроса
             while (rs.next()) {
-                list.add(mapRow(rs));
+                list.add(mapRow(rs)); // Добавление объектов в массив
             }
         } catch (SQLException e) {
             throw new RuntimeException("Ошибка: при получении товаров", e);
@@ -58,13 +59,13 @@ public class OrderRepositoryImpl implements OrderRepository {
     // Получение заказов отфильтрованных по статусу
     @Override
     public List<Order> findByStatus(String statusName) {
-        List<Order> list = new ArrayList<>();
-        String sql = selectQuery + " WHERE o.product_id = (SELECT os.id FROM order_statuses os  WHERE os.name = ?)";
+        List<Order> list = new ArrayList<>(); // Массив под результаты
+        String sql = selectQuery + " WHERE o.product_id = (SELECT os.id FROM order_statuses os  WHERE os.name = ?)"; // Строка запроса к БД
         try (Connection conn = DBConnection.getInstance().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, statusName);
-            ResultSet rs = ps.executeQuery();
+            ps.setString(1, statusName); // Передача переменных в запрос
+            ResultSet rs = ps.executeQuery(); // Результат выполнения запроса
             while (rs.next()) {
-                list.add(mapRow(rs));
+                list.add(mapRow(rs)); // Добавление объектов в массив
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -76,12 +77,12 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public List<Order> findByOrderDate(LocalDateTime orderDate){
         List<Order> list = new ArrayList<>();
-        String sql = selectQuery + " WHERE o.order_date = ?";
+        String sql = selectQuery + " WHERE o.order_date = ?"; // Строка запроса к БД
         try (Connection conn = DBConnection.getInstance().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setTimestamp(1, Timestamp.valueOf(orderDate));
-            ResultSet rs = ps.executeQuery();
+            ps.setTimestamp(1, Timestamp.valueOf(orderDate)); // Передача переменных в запрос
+            ResultSet rs = ps.executeQuery(); // Результат выполнения запроса
             while (rs.next()) {
-                list.add(mapRow(rs));
+                list.add(mapRow(rs)); // Добавление объектов в массив
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -93,11 +94,11 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public Optional<Order> findById(int id) {
         Order order = null;
-        String sql = selectQuery + " WHERE o.id = ?";
+        String sql = selectQuery + " WHERE o.id = ?"; // Строка запроса к БД
         try (Connection conn = DBConnection.getInstance().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
-            order = mapRow(rs);
+            ps.setInt(1, id); // Передача переменных в запрос
+            ResultSet rs = ps.executeQuery(); // Результат выполнения запроса
+            order = mapRow(rs); // Создание объекта из результата запроса
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -106,30 +107,30 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     // Вставить запись
     @Override
-    public Order create(Order entity) {
+    public void create(Order entity) {
         Connection conn = null;
         String sql = "INSERT INTO orders (product_id, customer_id, order_date, status_id) VALUES (?, ?, ?, ?)";
         try {
             conn = DBConnection.getInstance().getConnection(); // установка соединения
-            conn.setAutoCommit(false); // отключение автокоммита
+            conn.setAutoCommit(false); // Отключение автокоммита
             try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                // Добавление переменных в запрос
                 ps.setInt(1, entity.getProductId());
                 ps.setInt(2, entity.getCustomerId());
                 ps.setTimestamp(3,  Timestamp.valueOf(entity.getOrderDate()));
                 ps.setInt(4, entity.getStatusId());
-                int rows = ps.executeUpdate();
+                int rows = ps.executeUpdate(); // Получение результатов
                 if (rows > 0) {
                     try (ResultSet rs = ps.getGeneratedKeys()) {
                         if (rs.next()) {
-                            int id = rs.getInt(1);
-                            entity.setId(id); // присваиваем id созданного клиента объекту
+                            int id = rs.getInt(1); // Получение id
+                            entity.setId(id); // Присваиваем id созданного клиента объекту
                         }
                     }
                 }
-                conn.commit();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
-                System.out.println("Заказ от: " + entity.getOrderDate().format(formatter) + " успешно добавлен");
-                return entity;
+                conn.commit(); // Выполняем коммит
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"); // Создаем формат для вывода даты
+                System.out.println("Заказ от: " + entity.getOrderDate().format(formatter) + " успешно добавлен"); // Выводим результат
             }
         } catch (SQLException e) {
             System.err.println("Ошибка при добавлении заказа: " + e.getMessage());
@@ -140,7 +141,6 @@ public class OrderRepositoryImpl implements OrderRepository {
                 System.err.println("Ошибка при rollback: " + rollbackEx.getMessage());
             }
         }
-        return entity;
     }
 
     public List<Order> findLastFiveOrders() {
@@ -176,7 +176,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public void deleteById(int id) {
         Connection conn = null;
-        String sql = "DELETE FROM orders o WHERE o.id = ?";
+        String sql = "DELETE FROM orders o WHERE o.id = ?"; // Строка запроса к БД
         try {
             conn = DBConnection.getInstance().getConnection();
             conn.setAutoCommit(false);
@@ -199,6 +199,41 @@ public class OrderRepositoryImpl implements OrderRepository {
                 System.err.println("Ошибка при rollback: " + rollbackEx.getMessage());
             }
         }
+    }
+
+    @Override
+    public List<Order> updateStatus(Order order, String status) {
+        Connection conn = null;
+        String sql = "UPDATE orders o" +
+                " SET status_id = ?" +
+                " WHERE o.id = ?";
+        try {
+            conn = DBConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                OrderStatusRepositoryImpl osri = new OrderStatusRepositoryImpl(); // Создание экземпляра справочника запросов OrderStatus
+                int status_id = osri.findByName(status); // Получение id статуса по названию
+                // Передача переменных в запрос
+                ps.setFloat(1, status_id);
+                ps.setInt(2, order.getId());
+                int rows = ps.executeUpdate();
+                if (rows > 0) {
+                    System.out.println("Статус заказа от: " + order.getOrderDate() + " успешно обновлен.");
+                } else {
+                    System.out.println("Заказ с id " + order.getId() + " не найден");
+                }
+                conn.commit(); // Выполнение коммита
+            }
+        } catch (SQLException e) {
+            System.err.println("Ошибка при обновлении товара: " + e.getMessage());
+            try{
+                conn.rollback(); // Откат транзакции
+                System.out.println("Транзакция откатилась.");
+            } catch (SQLException rollbackEx) {
+                System.err.println("Ошибка при rollback: " + rollbackEx.getMessage());
+            }
+        }
+        return List.of();
     }
 
     // Создание экземпляра класса из полученной строки

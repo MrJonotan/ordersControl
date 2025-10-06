@@ -13,12 +13,12 @@ import java.util.Optional;
 public class OrderStatusRepositoryImpl implements CrudRepository<OrderStatus> {
     // Вставка записи
     @Override
-    public OrderStatus create(OrderStatus entity) {
+    public void create(OrderStatus entity) {
         Connection conn = null;
         String sql = "INSERT INTO order_statuses (name) VALUES (?)";
         try {
-            conn = DBConnection.getInstance().getConnection(); // установка соединения
-            conn.setAutoCommit(false); // отключение автокоммита
+            conn = DBConnection.getInstance().getConnection(); // Установка соединения
+            conn.setAutoCommit(false); // Отключение автокоммита
             try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, entity.getStatusName());
                 int rows = ps.executeUpdate();
@@ -32,7 +32,6 @@ public class OrderStatusRepositoryImpl implements CrudRepository<OrderStatus> {
                 }
                 conn.commit();
                 System.out.println("Статус: " + entity.getStatusName() + " успешно добавлен");
-                return entity;
             }
         } catch (SQLException e) {
             System.err.println("Ошибка при добавлении товара: " + e.getMessage());
@@ -43,7 +42,6 @@ public class OrderStatusRepositoryImpl implements CrudRepository<OrderStatus> {
                 System.err.println("Ошибка при rollback: " + rollbackEx.getMessage());
             }
         }
-        return entity;
     }
 
     // Поиск статуса заказа из справочника по id

@@ -4,11 +4,13 @@ public class OrderStatus {
     private int id;
     private String statusName;
 
+    // Конструктор для создания/обновления записи в БД из кода
     public OrderStatus (int id, String statusName){
         this.id = id;
         this.statusName = statusName;
     }
 
+    // Конструктор для создания экземпляра класса из запроса
     public OrderStatus (String statusName){
         this.statusName = statusName;
     }

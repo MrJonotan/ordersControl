@@ -11,4 +11,5 @@ public interface OrderRepository extends CrudRepository<Order> {
     public List<Order> findByProduct(String productName);
     public List<Order> findByStatus(String statusName);
     public List<Order> findByOrderDate(LocalDateTime orderDate);
+    public List<Order> updateStatus(Order order, String status);
 }

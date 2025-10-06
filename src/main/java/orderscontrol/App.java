@@ -14,32 +14,24 @@ import java.util.List;
 
 public class App {
     public static void main(String[] args) {
+        // Вызов метода миграции и заполнения таблиц
         createAndFillingDB();
-        /*
-           - Демонстрирует CRUD-операции:
-            +1. Вставка нового товара и покупателя (PreparedStatement).
-            +2. Создание заказа для покупателя.
-            3. Чтение и вывод последних 5 заказов с JOIN на товары и покупателей.
-            +4. Обновление цены товара и количества на складе.
-            5. Удаление тестовых записей.
-            - Работает в транзакции с commit() и rollback() при ошибках.
-         */
 
         // Создание экземпляров работы с БД
         ProductRepositoryImpl pri = new ProductRepositoryImpl();
         CustomersRepositoryImpl cri = new CustomersRepositoryImpl();
         OrderRepositoryImpl ori = new OrderRepositoryImpl();
 
-        // создание экземпляра товара
+        // Создание экземпляра товара
         Product newProduct = new Product("Чайник", 1200.00F, 68, "Electronic");
-        // добавление записи в БД
-        Product newProductRow = pri.create(newProduct);
+        // Добавление записи в БД
+        pri.create(newProduct);
 
         Customer newCustomer = new Customer("Никита Коновалов", "9867769087", "nikita@example.ru");
-        Customer newCustomerRow = cri.create(newCustomer);
+        cri.create(newCustomer);
 
         Order newOrder = new Order(newCustomer, newProduct, LocalDateTime.now(), "Новый");
-        Order newOrderRow = ori.create(newOrder);
+        ori.create(newOrder);
 
         // Вывод последних 5 заказов
         List<Order> orders = ori.findLastFiveOrders();
@@ -50,9 +42,9 @@ public class App {
         pri.updateQuantity(newProduct, 4);
 
         // Удаление тестовых записей
-        pri.deleteById(newProductRow.getId());
-        cri.deleteById(newCustomerRow.getId());
-        ori.deleteById(newOrderRow.getId());
+        pri.deleteById(newProduct.getId());
+        cri.deleteById(newCustomer.getId());
+        ori.deleteById(newOrder.getId());
     }
 
     // Запускаем автоматический процесс миграции и заполнения созданных таблиц

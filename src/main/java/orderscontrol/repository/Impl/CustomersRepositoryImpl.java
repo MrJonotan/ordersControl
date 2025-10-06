@@ -15,16 +15,18 @@ public class CustomersRepositoryImpl implements CustomerRepository {
     // Поиск по телефону
     @Override
     public List<Customer> findByPhone(String phone) {
-        List<Customer> customers = new ArrayList<>();
-        String sql = selectQuery + " WHERE c.phone = ? AND c.deleted_at IS NULL";
+        List<Customer> customers = new ArrayList<>(); // Объявление пустого массива под результаты
+        String sql = selectQuery + " WHERE c.phone = ? AND c.deleted_at IS NULL"; // Запрос к БД
+        // Выполнение подключения
         try (Connection conn = DBConnection.getInstance().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, phone);
-            ResultSet rs = ps.executeQuery();
+            ps.setString(1, phone); // Вставка переменных в запрос
+            ResultSet rs = ps.executeQuery(); // Получение данных из запроса
+            // Перебор полученных значений
             while (rs.next()) {
-                customers.add(mapRow(rs));
+                customers.add(mapRow(rs)); // Добавление нового экземпляра класса в массив
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); // Вывод ошибок
         }
         return customers;
     }
@@ -32,35 +34,38 @@ public class CustomersRepositoryImpl implements CustomerRepository {
     // Поиск по email
     @Override
     public List<Customer> findByEmail(String email) {
-        List<Customer> customers = new ArrayList<>();
-        String sql = selectQuery + " WHERE c.phone = ? AND c.deleted_at IS NULL";
+        List<Customer> customers = new ArrayList<>(); // Объявление пустого массива под результаты
+        String sql = selectQuery + " WHERE c.phone = ? AND c.deleted_at IS NULL"; // Запрос к БД
+        // Выполнение подключения
         try (Connection conn = DBConnection.getInstance().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, email);
-            ResultSet rs = ps.executeQuery();
+            ps.setString(1, email); // Передача переменных в запрос
+            ResultSet rs = ps.executeQuery(); // Получение данных
+            // Перебор результата
             while (rs.next()) {
-                customers.add(mapRow(rs));
+                customers.add(mapRow(rs)); // Добавление объекта в массив
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); // Вывод ошибок
         }
         return customers;
     }
 
     // Создание записи
     @Override
-    public Customer create(Customer entity) {
+    public void create(Customer entity) {
         Connection conn = null;
-        String sql = "INSERT INTO customers (name, phone, email) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO customers (name, phone, email) VALUES (?, ?, ?)"; // Строка запроса
         try {
             conn = DBConnection.getInstance().getConnection(); // установка соединения
-            conn.setAutoCommit(false); // отключение автокоммита
+            conn.setAutoCommit(false); // Отключение автокоммита
             try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                // Передача переменных в запрос
                 ps.setString(1, entity.getName());
                 ps.setString(2, entity.getPhone());
                 ps.setString(3, entity.getEmail());
 
-                int rows = ps.executeUpdate();
-                if (rows > 0) {
+                int rows = ps.executeUpdate(); // Получение результата
+                if (rows > 0) {  // проверка результата на пустоту
                     try (ResultSet rs = ps.getGeneratedKeys()) {
                         if (rs.next()) {
                             int id = rs.getInt(1);
@@ -68,20 +73,18 @@ public class CustomersRepositoryImpl implements CustomerRepository {
                         }
                     }
                 }
-                conn.commit();
-                System.out.println("Клиент: " + entity.getName() + " успешно добавлен");
-                return entity;
+                conn.commit(); // Выполнение коммита
+                System.out.println("Клиент: " + entity.getName() + " успешно добавлен"); // Вывод сообщения в консоль
             }
         } catch (SQLException e) {
-            System.err.println("Ошибка при добавлении клиента: " + e.getMessage());
+            System.err.println("Ошибка при добавлении клиента: " + e.getMessage()); // При ошибке запроса
             try{
-                conn.rollback(); // откат транзакции
+                conn.rollback(); // Откат транзакции
                 System.out.println("Транзакция откатилась.");
             } catch (SQLException rollbackEx) {
                 System.err.println("Ошибка при rollback: " + rollbackEx.getMessage());
             }
         }
-        return entity;
     }
 
     @Override

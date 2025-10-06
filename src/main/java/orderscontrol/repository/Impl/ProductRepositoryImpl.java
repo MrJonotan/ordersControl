@@ -15,13 +15,13 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     // Создание записи
     @Override
-    public Product create(Product entity) {
+    public void create(Product entity) {
         String sql = "INSERT INTO products (description, price, quantity, category) VALUES (?, ?, ?, ?)";
         Connection conn = null;
         Product product = null;
         try {
             conn = DBConnection.getInstance().getConnection(); // установка соединения
-            conn.setAutoCommit(false); // отключение автокоммита
+            conn.setAutoCommit(false); // Отключение автокоммита
             try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, entity.getDescription());
                 ps.setFloat(2, entity.getPrice());
@@ -39,7 +39,6 @@ public class ProductRepositoryImpl implements ProductRepository {
                 }
                 conn.commit();
                 System.out.println("Товар: " + entity.getDescription() + " успешно добавлен");
-                return entity;
             }
         } catch (SQLException e) {
             System.err.println("Ошибка при добавлении товара: " + e.getMessage());
@@ -50,7 +49,6 @@ public class ProductRepositoryImpl implements ProductRepository {
                 System.err.println("Ошибка при rollback: " + rollbackEx.getMessage());
             }
         }
-        return entity;
     }
 
     // Поиск записи по id
